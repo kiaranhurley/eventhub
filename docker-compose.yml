@@ -1,0 +1,89 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  booking-service:
+    build:
+      context: services/booking-service
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+  payment-service:
+    build:
+      context: services/payment-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  ticket-service:
+    build:
+      context: services/ticket-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: services/notification-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  web-frontend:
+    build:
+      context: services/web-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    environment:
+      BOOKING_SERVICE_URL: http://booking-service:5000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - booking-service
