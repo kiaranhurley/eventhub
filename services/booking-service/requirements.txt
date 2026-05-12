@@ -1,0 +1,2 @@
+# Hand-written — fill in your own dependencies.
+# Likely: flask, pika, redis

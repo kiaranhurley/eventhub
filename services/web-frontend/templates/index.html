@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EventHub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    header { background: #1a1a2e; color: #fff; padding: 1.2rem 2rem; }
+    header h1 { font-size: 1.6rem; }
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+    .card { background: #fff; border-radius: 8px; padding: 1.4rem; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+    .card h2 { font-size: 1.1rem; margin-bottom: .4rem; }
+    .card .meta { font-size: .85rem; color: #666; margin-bottom: .8rem; line-height: 1.5; }
+    .card .price { font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; color: #1a1a2e; }
+    .card .price span { font-weight: 400; font-size: .85rem; color: #888; }
+    button.book-btn {
+      width: 100%; padding: .7rem; border: none; border-radius: 6px;
+      background: #e63946; color: #fff; font-size: 1rem; cursor: pointer;
+    }
+    button.book-btn:disabled { background: #aaa; cursor: default; }
+    .status-msg { margin-top: .7rem; font-size: .9rem; min-height: 1.2em; text-align: center; }
+    .status-msg.confirmed { color: #2a9d3a; font-weight: 600; }
+    .status-msg.failed    { color: #c0392b; font-weight: 600; }
+    .status-msg.pending   { color: #888; }
+  </style>
+</head>
+<body>
+  <header><h1>EventHub</h1></header>
+  <main>
+    <h2 style="margin-bottom:1.2rem">Upcoming Events</h2>
+    <div class="event-grid">
+      {% for event in events %}
+      <div class="card" id="card-{{ event.id }}">
+        <h2>{{ event.name }}</h2>
+        <div class="meta">
+          📍 {{ event.venue }}<br>
+          📅 {{ event.date }}<br>
+          🎟 {{ event.available }} tickets left
+        </div>
+        <div class="price">
+          {% if event.price == 0.0 %}Free{% else %}€{{ "%.2f"|format(event.price) }}{% endif %}
+          <span>per ticket</span>
+        </div>
+        <button class="book-btn" data-event-id="{{ event.id }}" onclick="bookEvent(this)">Book</button>
+        <div class="status-msg pending" id="status-{{ event.id }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </main>
+
+  <script>
+    async function bookEvent(btn) {
+      const eventId = btn.dataset.eventId;
+      const statusEl = document.getElementById('status-' + eventId);
+      btn.disabled = true;
+      statusEl.textContent = 'Submitting…';
+      statusEl.className = 'status-msg pending';
+
+      const form = new FormData();
+      form.append('event_id', eventId);
+      form.append('customer_id', 'guest-' + Math.random().toString(36).slice(2, 8));
+
+      let bookingId;
+      try {
+        const res = await fetch('/book', { method: 'POST', body: form });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          statusEl.textContent = data.error || 'Booking failed';
+          statusEl.className = 'status-msg failed';
+          btn.disabled = false;
+          return;
+        }
+        bookingId = data.booking_id;
+        statusEl.textContent = 'Processing payment…';
+      } catch (e) {
+        statusEl.textContent = 'Network error';
+        statusEl.className = 'status-msg failed';
+        btn.disabled = false;
+        return;
+      }
+
+      // Poll until confirmed or failed
+      const poll = setInterval(async () => {
+        try {
+          const res = await fetch('/status/' + bookingId);
+          const data = await res.json();
+          if (data.status === 'confirmed') {
+            clearInterval(poll);
+            statusEl.textContent = '✓ Confirmed — ticket ' + (data.ticket_id || bookingId).slice(0, 8);
+            statusEl.className = 'status-msg confirmed';
+          } else if (data.status === 'failed') {
+            clearInterval(poll);
+            statusEl.textContent = '✗ Payment failed — try again';
+            statusEl.className = 'status-msg failed';
+            btn.disabled = false;
+          } else {
+            statusEl.textContent = 'Status: ' + (data.status || 'pending') + '…';
+          }
+        } catch (e) {
+          // keep polling on transient errors
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
