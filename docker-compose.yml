@@ -25,6 +25,8 @@ services:
     build:
       context: services/booking-service
       dockerfile: Dockerfile
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
     environment:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       REDIS_URL: redis://redis:6379/0
