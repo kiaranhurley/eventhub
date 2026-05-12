@@ -2,6 +2,8 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    # Avoid wrong-arch layers on Windows (exec format error on entrypoint)
+    platform: linux/amd64
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -13,6 +15,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    platform: linux/amd64
     ports:
       - "6379:6379"
     healthcheck:

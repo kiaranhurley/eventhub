@@ -7,18 +7,15 @@ app = Flask(__name__)
 
 BOOKING_SERVICE_URL = os.environ.get("BOOKING_SERVICE_URL", "http://booking-service:5000")
 
-EVENTS = [
-    {"id": "evt-001", "name": "Dublin Tech Summit", "venue": "RDS Arena, Dublin", "date": "2026-06-14", "price": 49.00, "available": 200},
-    {"id": "evt-002", "name": "Cork Jazz Festival", "venue": "Fitzgerald Park, Cork", "date": "2026-07-20", "price": 25.00, "available": 500},
-    {"id": "evt-003", "name": "Galway Comedy Night", "venue": "Roisin Dubh, Galway", "date": "2026-08-03", "price": 18.00, "available": 80},
-    {"id": "evt-004", "name": "Belfast Film Fest", "venue": "QFT, Belfast", "date": "2026-09-12", "price": 12.00, "available": 150},
-    {"id": "evt-005", "name": "Limerick Startup Day", "venue": "Limerick Institute", "date": "2026-10-01", "price": 0.00, "available": 300},
-]
-
 
 @app.route("/")
 def index():
-    return render_template("index.html", events=EVENTS)
+    try:
+        resp = requests.get(f"{BOOKING_SERVICE_URL}/events", timeout=5)
+        events = resp.json()
+    except Exception:
+        events = []
+    return render_template("index.html", events=events)
 
 
 @app.route("/book", methods=["POST"])
