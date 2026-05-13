@@ -1,0 +1,16 @@
+# Standalone check: do NOT add this file to kustomization.yaml.
+# After fixing Docker Desktop image store + rebuilding:
+#   kubectl apply -f k8s/test-local-image-pod.yaml
+#   kubectl get pod test-eventhub-image
+#   kubectl delete -f k8s/test-local-image-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-eventhub-image
+spec:
+  restartPolicy: Never
+  containers:
+    - name: booking
+      image: eventhub-main-booking-service:latest
+      imagePullPolicy: Never
+      command: ["/bin/sh", "-c", "echo 'Image visible to Kubernetes'; sleep 3"]

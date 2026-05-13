@@ -45,6 +45,10 @@ kubectl delete pod imgcheck --ignore-not-found
 
 If `imgcheck` stays **`ErrImageNeverPull`**, the cluster still cannot see your Compose-built image (fix the image store or provisioner above).
 
+Declarative equivalent (same check, lives in repo): `kubectl apply -f k8s/test-local-image-pod.yaml` then `kubectl get pod test-eventhub-image` — expect **`Succeeded`** / **`Completed`**, not **`ErrImageNeverPull`**. Clean up with `kubectl delete -f k8s/test-local-image-pod.yaml`. **Do not** add that file to `kustomization.yaml` (keep it out of `kubectl apply -k k8s/`).
+
+**Note:** Any external guide that says `kubectl apply -k ./kustomize-dir/` is wrong for this project — the overlay is **`k8s/`** (`kubectl apply -k k8s/`).
+
 ## Run tests
 
 ```powershell
