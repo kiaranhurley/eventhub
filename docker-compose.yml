@@ -84,8 +84,6 @@ services:
     build:
       context: services/web-frontend
       dockerfile: Dockerfile
-    volumes:
-      - ./wait-for-it.sh:/wait-for-it.sh:ro
     environment:
       BOOKING_SERVICE_URL: http://booking-service:5000
     ports:
