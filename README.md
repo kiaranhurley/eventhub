@@ -2,6 +2,8 @@
 
 A vertical slice of an event ticketing platform built as a microservice and event-driven system.
 
+**Submission:** branch `submission` tracks the hand-in bundle (including `docs/EventHub_Submission_Document.docx` and a Compose tweak: no `wait-for-it` bind-mount on web-frontend). Continue development on `main` unless you merge.
+
 ## Quick start
 
 ```powershell
