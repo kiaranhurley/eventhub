@@ -1,4 +1,4 @@
-"""End-to-end booking API against a running booking-service (Compose or local)."""
+"""hits live booking api (compose / local port)"""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def _reachable():
 @pytest.mark.e2e
 def test_full_booking_flow_creates_booking_and_returns_json():
     if not _reachable():
-        pytest.skip(f"booking-service not reachable at {BOOKING_URL} (start Compose or port-forward)")
+        pytest.skip(f"can't reach booking at {BOOKING_URL}")
 
     event_id = "evt-005"
     customer = f"e2e-{uuid.uuid4().hex[:8]}"

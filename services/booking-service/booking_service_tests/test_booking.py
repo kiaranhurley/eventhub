@@ -1,4 +1,4 @@
-"""Unit tests for booking-service (mocked Redis + Pika; no live broker or DB)."""
+"""booking tests — fake redis + fake publish, no rabbit"""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Run bandit on a narrow path so the suite stays stable."""
+"""bandit on web-frontend only so random HIGHs elsewhere don't flake"""
 
 from __future__ import annotations
 

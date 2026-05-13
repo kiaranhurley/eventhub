@@ -1,4 +1,4 @@
-"""Unit tests for notification-service handler (mocked channel)."""
+"""notification handler — fake rabbit channel"""
 
 from __future__ import annotations
 

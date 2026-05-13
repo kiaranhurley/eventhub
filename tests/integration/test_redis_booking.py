@@ -1,4 +1,4 @@
-"""Integration tests against a live Redis (skipped if unreachable)."""
+"""real redis — skips if nothing listening"""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ def test_redis_incr_decr_roundtrip():
     try:
         r.ping()
     except redis.exceptions.ConnectionError:
-        pytest.skip("Redis not available on REDIS_TEST_URL / default localhost:6379")
+        pytest.skip("redis not up (check REDIS_TEST_URL)")
 
     key = f"pytest:eventhub:{uuid.uuid4()}:available"
     r.delete(key)
@@ -40,7 +40,7 @@ def test_booking_style_key_roundtrip():
     try:
         r.ping()
     except redis.exceptions.ConnectionError:
-        pytest.skip("Redis not available")
+        pytest.skip("redis not up")
 
     bid = str(uuid.uuid4())
     key = f"pytest:booking:{bid}"

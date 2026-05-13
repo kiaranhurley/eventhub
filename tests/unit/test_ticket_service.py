@@ -1,4 +1,4 @@
-"""Unit tests for ticket-service handler (mocked Redis + channel)."""
+"""ticket handler — mocked redis + channel"""
 
 from __future__ import annotations
 

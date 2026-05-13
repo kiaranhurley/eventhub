@@ -1,4 +1,4 @@
-"""Contract-style checks: required keys on event payloads used across services."""
+"""quick checks that sample events have the fields we rely on"""
 
 from __future__ import annotations
 

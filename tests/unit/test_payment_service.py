@@ -1,4 +1,4 @@
-"""Unit tests for payment-service handler (mocked channel; no RabbitMQ)."""
+"""payment handler — fake channel only"""
 
 from __future__ import annotations
 

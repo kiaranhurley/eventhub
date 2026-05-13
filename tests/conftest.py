@@ -1,1 +1,1 @@
-"""Repo-wide pytest hooks (optional shared fixtures later)."""
+"""pytest hooks / shared fixtures later maybe"""

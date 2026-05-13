@@ -1,4 +1,4 @@
-"""Light latency check against a running booking-service."""
+"""rough speed check on POST /bookings"""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def test_create_booking_latency_under_two_seconds():
     try:
         requests.get(f"{BOOKING_URL}/healthz", timeout=1.5)
     except requests.RequestException:
-        pytest.skip(f"booking-service not reachable at {BOOKING_URL}")
+        pytest.skip(f"no booking at {BOOKING_URL}")
 
     t0 = time.monotonic()
     r = requests.post(
