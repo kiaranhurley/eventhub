@@ -39,7 +39,7 @@ Run `kubectl get nodes`. If the node name looks like **`desktop-control-plane`**
 Pick **one** of these fixes, then run `docker compose build` again and `kubectl apply -k k8s/`:
 
 1. **Enable the containerd image store** (recommended): Docker Desktop → **Settings** → **General** → turn on **Use containerd for pulling and storing images** → **Apply & restart** → rebuild images. That aligns `docker build` / Compose with what the cluster can run.
-2. **Or switch the cluster** to **kubeadm** (Docker Desktop → **Kubernetes** → edit cluster / provisioner). Kubeadm mode is documented as compatible with the **Docker** image store, so locally built tags are visible without that toggle.
+2. **Or switch the cluster** to **kubeadm** (Docker Desktop → **Kubernetes** → edit cluster / provisioner). Kubeadm mode is documented as compatible with the **Docker** image store, so locally built tags are visible without that toggle. After the switch you should see the node name **`docker-desktop`** (not `desktop-control-plane`); **`imagePullPolicy: Never`** with `eventhub-main-*:latest` then works with `docker compose build` on the same machine.
 
 Quick check after a rebuild:
 
