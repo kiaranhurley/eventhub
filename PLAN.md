@@ -24,7 +24,7 @@ What Kiaran does:
 - Write the booking-service in Flask + pika + redis-py
 - Implement `POST /bookings`, `GET /bookings/{id}`, `GET /events`, `GET /healthz`
 - Add a consumer thread for `payment.authorised`, `payment.failed`, `ticket.issued`
-- Write 4 to 5 pytest unit tests in `services/booking-service/tests/`. Mock pika and redis.
+- Write 4 to 5 pytest unit tests in `services/booking-service/booking_service_tests/` (not `tests/` under the service — clashes with repo `tests` in pytest). Mock pika and redis.
 - Commit every step through git. The marker may look at the history.
 
 What Claude Code does:
@@ -33,7 +33,7 @@ What Claude Code does:
 - Helps with the broader project tree if asked (folders for other services)
 - Answers conceptual questions about pika, Flask, Redis, RabbitMQ exchanges
 
-End-of-day check: `pytest services/booking-service/tests/` passes locally.
+End-of-day check: `pytest services/booking-service/booking_service_tests/` passes locally.
 
 ## Day 2 (Thu 7 May): AI generates the rest
 

@@ -20,6 +20,7 @@ Write-Host "=== performance ===" -ForegroundColor Cyan
 pytest -m performance
 
 Write-Host "=== security (bandit) ===" -ForegroundColor Cyan
-bandit -r services/
+pytest -m security
+if ($LASTEXITCODE -ne 0) { Write-Host "security tests FAILED" -ForegroundColor Red; exit 1 }
 
 Write-Host "All layers done." -ForegroundColor Green

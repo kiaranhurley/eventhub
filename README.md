@@ -30,6 +30,24 @@ Images use `imagePullPolicy: Never`, so the kubelet must already have `eventhub-
 
 Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
 
+### Verify Kubernetes is healthy
+
+```powershell
+kubectl config current-context          # expect: docker-desktop
+kubectl get nodes                       # expect: Ready
+kubectl get pods                        # expect: all Running, READY matches replicas
+kubectl get svc web-frontend            # expect: NodePort 30080 -> 8080
+kubectl rollout status deployment/booking-service
+curl.exe -s http://localhost:30080/healthz
+curl.exe -s http://localhost:5000/healthz   # only if booking-service port-forward or Compose
+```
+
+To **smoke-test the UI on the cluster**, use the NodePort URL above. To **trace one booking**, pick a pod and stream logs (replace the pod name from `kubectl get pods`):
+
+```powershell
+kubectl logs -f deployment/booking-service --tail=50
+```
+
 Init containers use **`redis:7-alpine`** (same tag as the Redis Deployment) instead of `busybox`, because Docker Desktop often shows **`Init:ImagePullBackOff`** on extra Hub pulls while `redis` / `rabbitmq` images already loaded on the node work reliably.
 
 ### If pods show `ErrImageNeverPull` for `eventhub-main-*`
@@ -58,6 +76,8 @@ Declarative equivalent (same check, lives in repo): `kubectl apply -f k8s/test-l
 **Automation limit:** From the terminal we can run `docker compose build`, `kubectl apply`, resets (`docker desktop kubernetes reset-cluster`), and checks. **We cannot click Docker Desktop Settings** (for example switching the Kubernetes provisioner from **kind** to **kubeadm**, or toggling **Use containerd for pulling and storing images**). If `eventhub-imgcheck` / your pods still show **`ErrImageNeverPull`**, that GUI step is still required on your machine.
 
 ## Run tests
+
+Hand-written booking unit tests live in **`services/booking-service/booking_service_tests/`** (not a nested `tests/` folder under the service, because pytest would treat that as the repo `tests` package and break collection).
 
 ```powershell
 pytest -m unit
