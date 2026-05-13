@@ -20,9 +20,30 @@ kubectl apply -k k8s/
 kubectl get pods --watch
 ```
 
-Images use `imagePullPolicy: Never` so the Kubernetes node must already have `eventhub-main-*` images (Docker Desktop’s cluster shares the local daemon). Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
+Images use `imagePullPolicy: Never`, so the kubelet must already have `eventhub-main-*` in **the same image store Kubernetes uses** (not only in `docker images` on the host).
+
+Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
 
 Init containers use **`redis:7-alpine`** (same tag as the Redis Deployment) instead of `busybox`, because Docker Desktop often shows **`Init:ImagePullBackOff`** on extra Hub pulls while `redis` / `rabbitmq` images already loaded on the node work reliably.
+
+### If pods show `ErrImageNeverPull` for `eventhub-main-*`
+
+Run `kubectl get nodes`. If the node name looks like **`desktop-control-plane`**, Docker Desktop is using the **kind** provisioner. Per Docker’s docs, **kind only works with the containerd image store**, not the classic Docker Engine store—so `docker compose build` can succeed while Kubernetes still reports the image as missing.
+
+Pick **one** of these fixes, then run `docker compose build` again and `kubectl apply -k k8s/`:
+
+1. **Enable the containerd image store** (recommended): Docker Desktop → **Settings** → **General** → turn on **Use containerd for pulling and storing images** → **Apply & restart** → rebuild images. That aligns `docker build` / Compose with what the cluster can run.
+2. **Or switch the cluster** to **kubeadm** (Docker Desktop → **Kubernetes** → edit cluster / provisioner). Kubeadm mode is documented as compatible with the **Docker** image store, so locally built tags are visible without that toggle.
+
+Quick check after a rebuild:
+
+```powershell
+kubectl run imgcheck --image=eventhub-main-booking-service:latest --image-pull-policy=Never --restart=Never --command -- sleep 30
+kubectl get pod imgcheck
+kubectl delete pod imgcheck --ignore-not-found
+```
+
+If `imgcheck` stays **`ErrImageNeverPull`**, the cluster still cannot see your Compose-built image (fix the image store or provisioner above).
 
 ## Run tests
 
