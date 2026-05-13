@@ -20,6 +20,12 @@ kubectl apply -k k8s/
 kubectl get pods --watch
 ```
 
+Or one script that builds, applies, runs the booking image check, and lists pods:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/k8s-apply-and-check.ps1
+```
+
 Images use `imagePullPolicy: Never`, so the kubelet must already have `eventhub-main-*` in **the same image store Kubernetes uses** (not only in `docker images` on the host).
 
 Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
@@ -48,6 +54,8 @@ If `imgcheck` stays **`ErrImageNeverPull`**, the cluster still cannot see your C
 Declarative equivalent (same check, lives in repo): `kubectl apply -f k8s/test-local-image-pod.yaml` then `kubectl get pod test-eventhub-image` — expect **`Succeeded`** / **`Completed`**, not **`ErrImageNeverPull`**. Clean up with `kubectl delete -f k8s/test-local-image-pod.yaml`. **Do not** add that file to `kustomization.yaml` (keep it out of `kubectl apply -k k8s/`).
 
 **Note:** Any external guide that says `kubectl apply -k ./kustomize-dir/` is wrong for this project — the overlay is **`k8s/`** (`kubectl apply -k k8s/`).
+
+**Automation limit:** From the terminal we can run `docker compose build`, `kubectl apply`, resets (`docker desktop kubernetes reset-cluster`), and checks. **We cannot click Docker Desktop Settings** (for example switching the Kubernetes provisioner from **kind** to **kubeadm**, or toggling **Use containerd for pulling and storing images**). If `eventhub-imgcheck` / your pods still show **`ErrImageNeverPull`**, that GUI step is still required on your machine.
 
 ## Run tests
 
