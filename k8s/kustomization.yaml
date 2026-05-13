@@ -1,0 +1,16 @@
+# Apply order is defined here (kubectl apply -k ./k8s).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - configmap.yaml
+  - redis-service.yaml
+  - redis-deployment.yaml
+  - rabbitmq-service.yaml
+  - rabbitmq-deployment.yaml
+  - booking-service.yaml
+  - booking-deployment.yaml
+  - payment-deployment.yaml
+  - ticket-deployment.yaml
+  - notification-deployment.yaml
+  - web-frontend-service.yaml
+  - web-frontend-deployment.yaml

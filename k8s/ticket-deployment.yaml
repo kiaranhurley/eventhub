@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-service
+  labels:
+    app: ticket-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-service
+  template:
+    metadata:
+      labels:
+        app: ticket-service
+    spec:
+      initContainers:
+        - name: wait-redis
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z redis 6379; do sleep 1; done"]
+        - name: wait-rabbitmq
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 1; done"]
+      containers:
+        - name: ticket-service
+          image: eventhub-main-ticket-service:latest
+          imagePullPolicy: Never
+          command: ["python", "main.py"]
+          ports:
+            - containerPort: 9100
+              name: health
+          envFrom:
+            - configMapRef:
+                name: eventhub-config
+          env:
+            - name: HEALTH_PORT
+              value: "9100"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9100
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3

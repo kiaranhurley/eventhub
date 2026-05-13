@@ -1,13 +1,16 @@
 import json
 import os
 import random
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pika
 
 RABBITMQ_URL = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+HEALTH_PORT = int(os.environ.get("HEALTH_PORT", "9100"))
 EXCHANGE = "bookings"
 
 
@@ -60,7 +63,27 @@ def on_booking_requested(ch, method, properties, body):
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
 
+class _HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path in ("/healthz", "/healthz/"):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK")
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, *args, **kwargs):
+        pass
+
+
+def _start_health_server():
+    server = HTTPServer(("0.0.0.0", HEALTH_PORT), _HealthHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
+
 def main():
+    _start_health_server()
     connection = get_connection()
     channel = connection.channel()
 

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  labels:
+    app: booking-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      initContainers:
+        - name: wait-redis
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z redis 6379; do sleep 1; done"]
+        - name: wait-rabbitmq
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z rabbitmq 5672; do sleep 1; done"]
+      containers:
+        - name: booking-service
+          image: eventhub-main-booking-service:latest
+          imagePullPolicy: Never
+          command: ["python", "main.py"]
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: eventhub-config
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3

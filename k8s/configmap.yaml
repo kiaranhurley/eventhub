@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventhub-config
+  labels:
+    app.kubernetes.io/name: eventhub
+data:
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+  REDIS_URL: "redis://redis:6379/0"
+  BOOKING_SERVICE_URL: "http://booking-service:5000"

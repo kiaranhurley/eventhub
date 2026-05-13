@@ -18,6 +18,7 @@ This log goes into the submission document. It is part of the 30% reflection gra
 | 2026-05-12 | K8s-safe booking-service image | Human + Cursor | (Human wrote service.) Asked to align Dockerfile so `/wait-for-it.sh` exists **inside** the image for Kubernetes, not only via Compose volume | Added `COPY wait-for-it.sh` + `chmod` in `services/booking-service/Dockerfile`; kept Compose volume optional | Good. | Same pattern as labs: image must be self-contained for K8s; Compose can still mount overrides for dev. |
 | 2026-05-12 | Web UI stale ticket counts | Cursor / Claude | Frontend showed fixed availability; wire `index()` to booking-service `GET /events` | Removed hardcoded `EVENTS`; fetch live JSON with timeout and empty fallback | Good. | Single source of truth for inventory should be the service that owns Redis, not duplicated in the UI. |
 | 2026-05-12 | Commit and push to GitHub | Cursor / Claude | Push updates to `github.com/kiaranhurley/eventhub` | Resolved nested-folder vs flat repo layout when syncing | Good. | Local folder layout may not match remote root; clone-merge or single inner repo avoids a mess. |
+| 2026-05-12 | Kubernetes manifests from Compose | Cursor / Claude | Generate `k8s/` from `docker-compose.yml`: replicas (web 2, booking 2, others 1), NodePort 30080, ConfigMap for broker/Redis/booking URL, `/healthz` liveness | Added `kustomization.yaml` for apply order; initContainers (busybox) for startup deps; `command: ["python","main.py"]` to skip wait-for-it in-cluster; small threaded **HTTP /healthz on port 9100** in payment/ticket/notification so probes match ARCHITECTURE | Good. | Compose `depends_on` becomes initContainers + ClusterIP DNS; pure AMQP workers need an explicit health endpoint for kube probes. |
 
 ## Column guide
 
@@ -63,4 +64,5 @@ Notes:
 
 - **Booking-service (mine):** I own the state machine, Redis keys, and Rabbit publish/consume paths; when something misbehaved I could reason from first principles. Infra bugs (Redis arch, image `COPY`) lived outside that code.
 - **AI-assisted shell (Compose, Dockerfiles, other microservices):** Faster to scaffold, but failures were often **environmental** (build context, arch, entrypoint) until I read the error text and adjusted files by hand.
+- **Kubernetes:** Manifests mirror Compose but needed extra pieces (ConfigMap env wiring, NodePort, probes). Consumer services only spoke AMQP until a minimal health HTTP was added for liveness—packaging work around the same Python you already had.
 - **Debugging:** Booking logic bugs would be traced in Python and Redis; stack failures were Docker/registry/cache until platform and file copies were fixed.

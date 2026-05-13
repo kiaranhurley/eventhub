@@ -12,12 +12,15 @@ Open `http://localhost:8080`. Click Book on any event. Watch the booking confirm
 
 ## On Kubernetes
 
+Build images locally first (same tags the cluster expects), then apply:
+
 ```powershell
-kubectl apply -f k8s/
+docker compose build
+kubectl apply -k k8s/
 kubectl get pods --watch
 ```
 
-Open `http://localhost:30080` once all pods are Running.
+Images use `imagePullPolicy: Never` so the Kubernetes node must already have `eventhub-main-*` images (Docker Desktop’s cluster shares the local daemon). Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
 
 ## Run tests
 
