@@ -22,6 +22,8 @@ kubectl get pods --watch
 
 Images use `imagePullPolicy: Never` so the Kubernetes node must already have `eventhub-main-*` images (Docker Desktop’s cluster shares the local daemon). Open `http://localhost:30080` once all pods are Running (web-frontend NodePort).
 
+Init containers use **`redis:7-alpine`** (same tag as the Redis Deployment) instead of `busybox`, because Docker Desktop often shows **`Init:ImagePullBackOff`** on extra Hub pulls while `redis` / `rabbitmq` images already loaded on the node work reliably.
+
 ## Run tests
 
 ```powershell

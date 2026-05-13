@@ -16,7 +16,8 @@ spec:
     spec:
       initContainers:
         - name: wait-booking
-          image: busybox:1.36
+          image: redis:7-alpine
+          imagePullPolicy: IfNotPresent
           command:
             - "sh"
             - "-c"
