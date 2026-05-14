@@ -28,3 +28,14 @@ pytest
 ```
 
 Booking unit tests: `services/booking-service/booking_service_tests/` (separate from top-level `tests/` so pytest does not confuse package names).
+
+## Zipping for Canvas
+
+**Git** ignores `__pycache__/`, `.pytest_cache/`, and `*.pyc` (see `.gitignore`) so they are not pushed to GitHub. **Canvas** uses whatever you put in the zip, so delete caches on disk before zipping (run from the repo root, same folder as `docker-compose.yml`):
+
+```powershell
+Get-ChildItem -Recurse -Directory -Filter __pycache__ -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+Remove-Item -Recurse -Force .pytest_cache -ErrorAction SilentlyContinue
+```
+
+Then zip the project folder. GitHub’s **Code → Download ZIP** gives a snapshot without your local caches; if you zip from File Explorer yourself, run the commands above first.
